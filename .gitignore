@@ -1,0 +1,5 @@
+# Ignore data directory
+data/
+
+# Ignore plots
+plots/
