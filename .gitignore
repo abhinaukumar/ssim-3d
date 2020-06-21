@@ -3,3 +3,6 @@ data/
 
 # Ignore plots
 plots/
+
+# Ignore pycache
+__pycache__/
