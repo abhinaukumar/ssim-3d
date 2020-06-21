@@ -17,12 +17,15 @@ mssim = zeros([n_dist_files,n_ks]);
 
 ssim_pccs = zeros([n_ks, 1]);
 ssim_sroccs = zeros([n_ks, 1]);
+ssim_rmses = zeros([n_ks, 1]);
 
 msssim_pccs = zeros([n_ks, 1]);
 msssim_sroccs = zeros([n_ks, 1]);
+msssim_rmses = zeros([n_ks, 1]);
 
 load('/home/abhinau/projects/fb_live/ssim-comparison/data/nflx_repo_scores.mat');
 scores = scores.';
+scores = (scores - min(scores)) ./ (max(scores) - min(scores));
 
 i_dist = 3;
 
@@ -66,10 +69,23 @@ for i_k = 1:n_ks
     quality = modelfun(b_fit,mssim(:,i_k));
     [ssim_sroccs(i_k), ~] = corr(quality,scores,'Type','Spearman');
     [ssim_pccs(i_k), ~] = corr(quality,scores,'Type','Pearson');
+    ssim_rmses(i_k) = sqrt(mean((quality - scores).^2));
     
     modelfun = @(b,x)(b(1) .* (0.5 - 1./(1 + exp(b(2)*(x - b(3))))) + b(4) .* x + b(5));
     b_fit = nlinfit(multiscale_mssim(:,i_k), scores,modelfun,[1,1,1,1,1]);
     quality = modelfun(b_fit,multiscale_mssim(:,i_k));
     [msssim_sroccs(i_k), ~] = corr(quality,scores,'Type','Spearman');
     [msssim_pccs(i_k), ~] = corr(quality,scores,'Type','Pearson');
+    msssim_rmses(i_k) = sqrt(mean((quality - scores).^2));
 end
+
+figure;
+plot(ks, ssim_pccs, 'b-o')
+hold on
+plot(ks, msssim_pccs, 'g-o')
+plot(ks, ssim_sroccs, 'b-x')
+hold on
+plot(ks, msssim_sroccs, 'g-x')
+legend(["SSIM - PCC", "MS-SSIM - PCC", "SSIM - SROCC", "MS-SSIM - SROCC"])
+xlabel("K_t")
+ylabel("Correlation")
