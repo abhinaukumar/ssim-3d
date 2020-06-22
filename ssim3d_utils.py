@@ -1,9 +1,20 @@
 import numpy as np
+from numba import njit
 import cv2
-from skimage.transform.integral import integral_image
+# from skimage.transform.integral import integral_image
 from scipy.signal import convolve2d
 
-
+# @njit(parallel=True)
+def integral_image(x):
+    M,N	= x.shape
+    int_x = np.zeros((M, N))
+    for i in range(M):
+        int_x[i, :] = np.cumsum(x[i, :])
+    for i in range(N):
+        int_x[:, i] = np.cumsum(int_x[:, i])
+    return int_x
+    
+# @njit(parallel=True)
 def ssim_buff(buff_ref_sum_1, buff_ref_sum_2, buff_dist_sum_1, buff_dist_sum_2, buff_cross_sum, k_size, K1, K2, mode='partial'):
     C1 = (K1*255)**2
     C2 = (K2*255)**2
@@ -19,14 +30,21 @@ def ssim_buff(buff_ref_sum_1, buff_ref_sum_2, buff_dist_sum_1, buff_dist_sum_2, 
     int_1_ref = integral_image(temp_sum_1_ref)
     int_1_dist = integral_image(temp_sum_1_dist)
 
+    # int_1_ref = np.cumsum(np.cumsum(temp_sum_1_ref, axis=0), axis=1)
+    # int_1_dist = np.cumsum(np.cumsum(temp_sum_1_dist, axis=0), axis=1)
+
     temp_sum_2_ref = buff_ref_sum_2.copy()
     temp_sum_2_dist = buff_dist_sum_2.copy()
 
     int_2_ref = integral_image(temp_sum_2_ref)
     int_2_dist = integral_image(temp_sum_2_dist)
 
+    # int_2_ref =	np.cumsum(np.cumsum(temp_sum_2_ref, axis=0), axis=1)
+    # int_2_dist = np.cumsum(np.cumsum(temp_sum_2_dist, axis=0), axis=1)
+
     temp_sum_cross = buff_cross_sum.copy()
     int_cross = integral_image(temp_sum_cross)
+    # int_cross = np.cumsum(np.cumsum(temp_sum_cross, axis=0), axis=1)
 
     mu_ref_local = (int_1_ref[:-kh+1, :-kw+1] - int_1_ref[:-kh+1, kw-1:] - int_1_ref[kh-1:, :-kw+1] + int_1_ref[kh-1:, kw-1:]) / k_norm
     mu_dist_local = (int_1_dist[:-kh+1, :-kw+1] - int_1_dist[:-kh+1, kw-1:] - int_1_dist[kh-1:, :-kw+1] + int_1_dist[kh-1:, kw-1:]) / k_norm
