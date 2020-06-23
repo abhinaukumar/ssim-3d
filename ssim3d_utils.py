@@ -1,20 +1,16 @@
 import numpy as np
-from numba import njit
 import cv2
 # from skimage.transform.integral import integral_image
 from scipy.signal import convolve2d
 
-# @njit(parallel=True)
+
 def integral_image(x):
-    M,N	= x.shape
-    int_x = np.zeros((M, N))
-    for i in range(M):
-        int_x[i, :] = np.cumsum(x[i, :])
-    for i in range(N):
-        int_x[:, i] = np.cumsum(int_x[:, i])
+    M, N = x.shape
+    int_x = np.zeros((M+1, N+1))
+    int_x = np.cumsum(np.cumsum(x, 0), 1)
     return int_x
-    
-# @njit(parallel=True)
+
+
 def ssim_buff(buff_ref_sum_1, buff_ref_sum_2, buff_dist_sum_1, buff_dist_sum_2, buff_cross_sum, k_size, K1, K2, mode='partial'):
     C1 = (K1*255)**2
     C2 = (K2*255)**2
@@ -46,16 +42,16 @@ def ssim_buff(buff_ref_sum_1, buff_ref_sum_2, buff_dist_sum_1, buff_dist_sum_2, 
     int_cross = integral_image(temp_sum_cross)
     # int_cross = np.cumsum(np.cumsum(temp_sum_cross, axis=0), axis=1)
 
-    mu_ref_local = (int_1_ref[:-kh+1, :-kw+1] - int_1_ref[:-kh+1, kw-1:] - int_1_ref[kh-1:, :-kw+1] + int_1_ref[kh-1:, kw-1:]) / k_norm
-    mu_dist_local = (int_1_dist[:-kh+1, :-kw+1] - int_1_dist[:-kh+1, kw-1:] - int_1_dist[kh-1:, :-kw+1] + int_1_dist[kh-1:, kw-1:]) / k_norm
+    mu_ref_local = (int_1_ref[:-kh, :-kw] - int_1_ref[:-kh, kw:] - int_1_ref[kh:, :-kw] + int_1_ref[kh:, kw:]) / k_norm
+    mu_dist_local = (int_1_dist[:-kh, :-kw] - int_1_dist[:-kh, kw:] - int_1_dist[kh:, :-kw] + int_1_dist[kh:, kw:]) / k_norm
 
     mu_sq_ref_local = mu_ref_local**2
     mu_sq_dist_local = mu_dist_local**2
 
-    var_ref_local = (int_2_ref[:-kh+1, :-kw+1] - int_2_ref[:-kh+1, kw-1:] - int_2_ref[kh-1:, :-kw+1] + int_2_ref[kh-1:, kw-1:]) / k_norm - mu_sq_ref_local
-    var_dist_local = (int_2_dist[:-kh+1, :-kw+1] - int_2_dist[:-kh+1, kw-1:] - int_2_dist[kh-1:, :-kw+1] + int_2_dist[kh-1:, kw-1:]) / k_norm - mu_sq_dist_local
+    var_ref_local = (int_2_ref[:-kh, :-kw] - int_2_ref[:-kh, kw:] - int_2_ref[kh:, :-kw] + int_2_ref[kh:, kw:]) / k_norm - mu_sq_ref_local
+    var_dist_local = (int_2_dist[:-kh, :-kw] - int_2_dist[:-kh, kw:] - int_2_dist[kh:, :-kw] + int_2_dist[kh:, kw:]) / k_norm - mu_sq_dist_local
 
-    cov_local = (int_cross[:-kh+1, :-kw+1] - int_cross[:-kh+1, kw-1:] - int_cross[kh-1:, :-kw+1] + int_cross[kh-1:, kw-1:]) / k_norm - mu_ref_local*mu_dist_local
+    cov_local = (int_cross[:-kh, :-kw] - int_cross[:-kh, kw:] - int_cross[kh:, :-kw] + int_cross[kh:, kw:]) / k_norm - mu_ref_local*mu_dist_local
 
     ssim_buff_map = (2*cov_local + C2) / (var_ref_local + var_dist_local + C2)
     if mode == "full":
