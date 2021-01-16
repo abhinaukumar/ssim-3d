@@ -7,7 +7,7 @@ from scipy.signal import convolve2d
 def integral_image(x):
     M, N = x.shape
     int_x = np.zeros((M+1, N+1))
-    int_x = np.cumsum(np.cumsum(x, 0), 1)
+    int_x[1:, 1:] = np.cumsum(np.cumsum(x, 0), 1)
     return int_x
 
 
@@ -26,21 +26,14 @@ def ssim_buff(buff_ref_sum_1, buff_ref_sum_2, buff_dist_sum_1, buff_dist_sum_2, 
     int_1_ref = integral_image(temp_sum_1_ref)
     int_1_dist = integral_image(temp_sum_1_dist)
 
-    # int_1_ref = np.cumsum(np.cumsum(temp_sum_1_ref, axis=0), axis=1)
-    # int_1_dist = np.cumsum(np.cumsum(temp_sum_1_dist, axis=0), axis=1)
-
     temp_sum_2_ref = buff_ref_sum_2.copy()
     temp_sum_2_dist = buff_dist_sum_2.copy()
 
     int_2_ref = integral_image(temp_sum_2_ref)
     int_2_dist = integral_image(temp_sum_2_dist)
 
-    # int_2_ref =	np.cumsum(np.cumsum(temp_sum_2_ref, axis=0), axis=1)
-    # int_2_dist = np.cumsum(np.cumsum(temp_sum_2_dist, axis=0), axis=1)
-
     temp_sum_cross = buff_cross_sum.copy()
     int_cross = integral_image(temp_sum_cross)
-    # int_cross = np.cumsum(np.cumsum(temp_sum_cross, axis=0), axis=1)
 
     mu_ref_local = (int_1_ref[:-kh, :-kw] - int_1_ref[:-kh, kw:] - int_1_ref[kh:, :-kw] + int_1_ref[kh:, kw:]) / k_norm
     mu_dist_local = (int_1_dist[:-kh, :-kw] - int_1_dist[:-kh, kw:] - int_1_dist[kh:, :-kw] + int_1_dist[kh:, kw:]) / k_norm
@@ -112,6 +105,12 @@ def ssim3d(v_ref, v_dist, k_size, K1, K2):
             buff_dist[:, :, i % kt] = temp_dist
 
     return mssim
+
+
+def ssim_frame(frame_ref, frame_dist, k, K1, K2):
+    frame_ref = frame_ref.astype('float32')
+    frame_dist = frame_dist.astype('float32')
+    return ssim_buff(frame_ref, frame_ref**2, frame_dist, frame_dist**2, frame_ref*frame_dist, [k, k], K1, K2)
 
 
 def msssim2_1d(v_ref, v_dist, k_size, levels, K1, K2):
