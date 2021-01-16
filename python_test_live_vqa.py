@@ -92,7 +92,7 @@ for i_k in range(n_ks):
     msssim_sroccs[i_k] = spearmanr(scores_pred, scores)[0]
     msssim_rmses[i_k] = np.sqrt(np.mean((scores_pred - scores)**2))
 
-savemat(os.path.join('data', 'live_vqa_ssim3d_ssims.mat'), {'mssim': mssim, 'multiscale_mssim': multiscale_mssim,
-                                                            'ssim_pccs': ssim_pccs, 'ssim_sroccs': ssim_sroccs, 'ssim_rmses': ssim_rmses,
-                                                            'msssim_pccs': msssim_pccs, 'msssim_sroccs': msssim_sroccs, 'msssim_rmses': msssim_rmses
-                                                            })
+savemat(os.path.join('data', 'live_vqa_ssim3d_ssims.mat'),
+        {'mssim': mssim, 'multiscale_mssim': multiscale_mssim,
+         'ssim_pccs': ssim_pccs, 'ssim_sroccs': ssim_sroccs, 'ssim_rmses': ssim_rmses,
+         'msssim_pccs': msssim_pccs, 'msssim_sroccs': msssim_sroccs, 'msssim_rmses': msssim_rmses})
