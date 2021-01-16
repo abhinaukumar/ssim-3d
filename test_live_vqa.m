@@ -5,12 +5,11 @@ refs = ["pa", "rb", "rh", "tr", "st", "sf", "bs", "sh", "mc", "pr"];
 fps = ["25fps", "25fps", "25fps", "25fps", "25fps", "25fps", "25fps", "50fps", "50fps", "50fps"];
 
 n_folders = length(refs);
-db_dir = "/media/abhinau/ext_hard_drive/databases/LIVE_VQA/";
+db_dir = "databases/LIVE_VQA/";
 
 ks = [1, 3, 5, 7, 10, 15, 20];
 n_ks = length(ks);
 
-% ssims = cell([n_folders*15,1]);
 multiscale_mssim = zeros([n_folders*15,n_ks]);
 mssim = zeros([n_folders*15,n_ks]);
 
@@ -39,10 +38,10 @@ for i_ref = 1:n_folders
             disp([i_ref, i_dist, i_k])
             tic;
 
-%             mssim(k, i_k) = mean(ssim3d(v_ref, v_dist, [11, 11, ks(i_k)], 0.01, 0.03));
-% 
-%             v_ref.CurrentTime = 0;
-%             v_dist.CurrentTime = 0;
+            mssim(k, i_k) = mean(ssim3d(v_ref, v_dist, [11, 11, ks(i_k)], 0.01, 0.03));
+
+            v_ref.CurrentTime = 0;
+            v_dist.CurrentTime = 0;
 
             multiscale_mssim(k, i_k) = mean(msssim2_1d(v_ref, v_dist, [11, 11, ks(i_k)], 5 , 0.01, 0.03));
 
@@ -56,12 +55,6 @@ for i_ref = 1:n_folders
         v_ref.CurrentTime = 0;
     end
 end
-
-%     for i = 1:n_folders*15
-%         mssim(i) = mean(ssims{i});
-%     end
-mssim = real(mssim);
-multiscale_mssim = real(multiscale_mssim);
 
 for i_k = 1:n_ks
     modelfun = @(b,x)(b(1) .* (0.5 - 1./(1 + exp(b(2)*(x - b(3))))) + b(4) .* x + b(5));

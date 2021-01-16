@@ -1,7 +1,7 @@
 clc;
 clearvars;
 
-db_dir = "/media/abhinau/ext_hard_drive/databases/NFLX/NFLX-Repo/";
+db_dir = "databases/NFLX/NFLX-Repo/";
 ref_file_list = dir(db_dir + "ref/" + "rgb/");
 dist_file_list = dir(db_dir + "dis/" + "rgb/");
 
@@ -11,7 +11,6 @@ n_dist_files = length(dist_file_list);
 ks = [1, 3, 5, 7, 10, 15, 20];
 n_ks = length(ks);
 
-% ssims = cell([n_folders*15,1]);
 multiscale_mssim = zeros([n_dist_files,n_ks]);
 mssim = zeros([n_dist_files,n_ks]);
 
@@ -59,9 +58,6 @@ for i_ref = 3:n_ref_files
         v_ref.CurrentTime = 0;
     end
 end
-
-mssim = real(mssim);
-multiscale_mssim = real(multiscale_mssim);
 
 for i_k = 1:n_ks
     modelfun = @(b,x)(b(1) .* (0.5 - 1./(1 + exp(b(2)*(x - b(3))))) + b(4) .* x + b(5));

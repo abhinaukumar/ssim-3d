@@ -8,24 +8,9 @@ function mssim = ssim3d(v_ref, v_dist, k_size, K1, K2)
         H = v_ref.Height;
         W = v_ref.Width;
 
-%         kh = k_size(1);
-%         kw = k_size(2);
         kt = k_size(3);
-        
-%         k_norm = prod(k_size);
-%         avg_window = ones(k_size) ./ prod(k_size);
-        mssim = zeros([N - kt + 1,1]);
-        
-%         mu_ref_local = zeros([H - kh + 1, W - kw + 1]);
-%         mu_dist_local = zeros([H - kh + 1, W - kw + 1]);
-%         
-%         var_ref_local = zeros([H - kh + 1, W - kw + 1]);
-%         var_dist_local = zeros([H - kh + 1, W - kw + 1]);
-%         
-%         cov_local = zeros([H - kh + 1, W - kw + 1]);
 
-        C1 = (K1*255)^2;
-        C2 = (K2*255)^2;
+        mssim = zeros([N - kt + 1,1]);
 
         buff_ref = zeros([H, W, kt]);
         buff_dist = zeros([H, W, kt]);
@@ -62,20 +47,6 @@ function mssim = ssim3d(v_ref, v_dist, k_size, K1, K2)
             
             buff_ref(:,:,mod(i,kt) + 1) = temp_ref;
             buff_dist(:,:,mod(i,kt) + 1) = temp_dist;
-%             mu_ref_local = convn(buff_ref, avg_window, 'valid');
-%             mu_dist_local = convn(buff_dist, avg_window, 'valid');
-%             
-%             mu_sq_ref_local = mu_ref_local.^2;
-%             mu_sq_dist_local = mu_dist_local.^2;
-            
-%             var_ref_local = convn(buff_ref.^2, avg_window, 'valid') - mu_sq_ref_local;
-%             var_dist_local = convn(buff_dist.^2, avg_window, 'valid') - mu_sq_dist_local;
-            
-%             cov_local = convn(buff_ref .* buff_dist, avg_window, 'valid') - mu_ref_local.* mu_dist_local;
-            
-%             mssim(i - kt + 1) = mean(mean(((2 .* mu_ref_local .* mu_dist_local + C1) .* (2 .* cov_local + C2)) ./ ((mu_sq_ref_local + mu_sq_dist_local + C1) .* (var_ref_local + var_dist_local + C2))));
         end
-        
-%         mssim = mssim / (N - kt + 1);
     end
 end

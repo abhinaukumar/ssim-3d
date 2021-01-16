@@ -39,9 +39,15 @@ function mssim_buff = ssim_buff(buff_ref_sum_1, buff_ref_sum_2, buff_dist_sum_1,
 
     var_ref_local = (int_2_ref(1:end-kh, 1:end-kw) - int_2_ref(1:end-kh, kw+1:end) - int_2_ref(kh+1:end, 1:end-kw) + int_2_ref(kh+1:end, kw+1:end)) ./ k_norm - mu_sq_ref_local;
     var_dist_local = (int_2_dist(1:end-kh, 1:end-kw) - int_2_dist(1:end-kh, kw+1:end) - int_2_dist(kh+1:end, 1:end-kw) + int_2_dist(kh+1:end, kw+1:end)) ./ k_norm - mu_sq_dist_local;
-
     cov_local = (int_cross(1:end-kh, 1:end-kw) - int_cross(1:end-kh, kw+1:end) - int_cross(kh+1:end, 1:end-kw) + int_cross(kh+1:end, kw+1:end)) ./ k_norm - mu_ref_local .* mu_dist_local;
+
+    mask_ref = (var_ref_local <= 0);
+    mask_dist = (var_dist_local <= 0);
     
+    var_ref_local(mask_ref) = 0;
+    var_dist_local(mask_dist) = 0;
+    cov_local(mask_ref | mask_dist) = 0;
+
     map = (2 .* cov_local + C2) ./ (var_ref_local + var_dist_local + C2);
     if mode == "full"
         map = map .* (2 .* mu_ref_local .* mu_dist_local + C1) ./ (mu_sq_ref_local + mu_sq_dist_local + C1);
